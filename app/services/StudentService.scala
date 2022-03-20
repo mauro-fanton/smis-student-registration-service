@@ -30,7 +30,7 @@ class StudentService @Inject()(system: ActorSystem)
   )
 
   implicit val timeout = Timeout(15, TimeUnit.SECONDS)
-  lazy val studentManager = Await.result(system.actorSelection("user/" + StudentManager.NAME).resolveOne(), timeout.duration)
+  lazy val studentManager = Await.result(system.actorSelection("user/" + StudentManager.Name).resolveOne(), timeout.duration)
 
 
   def lookUp(id: String)(

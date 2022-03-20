@@ -1,17 +1,20 @@
 package actors
 
-import actors.StudentActor.StudentRegisteredEvent
-import akka.persistence.typed.PersistenceId
+import akka.actor.ActorLogging
+import akka.event.LoggingReceive
 import akka.persistence.{PersistentActor, Recovery, SnapshotOffer}
 import config.EventJacksonSerializer
 import dto.State
 import model.Student
 
+import java.util.UUID
+
 object StudentActor {
 
+  val Id = s"student-actor-${UUID.randomUUID().toString}"
+  val Name = "student-actor"
   //Command
   case class RegisterStudentCommand(student: Student) extends Command
-  case object GetStudent
 
   //Response
   case class StudentRegistrationSuccess(user: Student)
@@ -20,32 +23,23 @@ object StudentActor {
   case object StudentRetrievalFailure
 
   //Event
-  case class  StudentRegisteredEvent(student: Student) extends TaggedEvent with EventJacksonSerializer
+  case class StudentRegisteredEvent(student: Student) extends TaggedEvent with EventJacksonSerializer
 
 }
 
-//  case class State(history: List[String] = Nil) extends  EventJacksonSerializer {
-//    def updateState(applicationNumber: Option[String]): State = {
-//      applicationNumber match {
-//      case Some(a) => copy(a :: history)
-//      case None => copy(history)
-//    }
-//  }
-//  def size: Int = history.length
-//  override def toString: String = history.reverse.toString
-//}
 /**
  * Event sourced actor to persist student events to event log
  *
  */
-class StudentActor(override val persistenceId: String) extends PersistentActor {
+class StudentActor(override val persistenceId: String) extends PersistentActor with ActorLogging{
 
   import StudentActor._
 
   var state = State()
 
-  override def receiveCommand: Receive = {
+  override def receiveCommand: Receive = LoggingReceive {
     case RegisterStudentCommand(student) =>
+      log.info("Persisting Student {}", student)
       persist(StudentRegisteredEvent(student)) {
         event =>
           state = updateState(event)

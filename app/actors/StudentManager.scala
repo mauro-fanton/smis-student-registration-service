@@ -1,12 +1,12 @@
 package actors
 
 import ErrorHandler.StudentException
+import actors.SupervisorActor.createSupervisorWithOnStopStrategy
 import akka.NotUsed
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.event.LoggingReceive
 import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
 import akka.persistence.query.{EventEnvelope, Offset, PersistenceQuery}
-import akka.persistence.typed.PersistenceId
 import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 import constants.EventsTags
@@ -17,9 +17,8 @@ import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext
 
 object StudentManager {
-
   val ID = "sm_id_" + UUID.randomUUID().toString
-  val NAME = "student_manager"
+  val Name = "student_manager"
 }
 
 class StudentManager(
@@ -28,7 +27,6 @@ class StudentManager(
   extends Actor with ActorLogging {
 
   import StudentActor._
-
   private var state = State()
 
   val queries = PersistenceQuery(context.system).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
@@ -37,22 +35,27 @@ class StudentManager(
 
   students.runForeach { env =>
     env.event match {
-      case StudentRegisteredEvent(student) if(!state.contains(student.applicationNumber)) => {
+      case StudentRegisteredEvent(student) if(!state.contains(student.applicationNumber)) =>
         state = state.updateState(student.applicationNumber)
-      }
       case _ => println(s"Unknown event $env")
     }}
 
 
+  override def preStart() = {
+    log.info("Starting actor: {}", StudentManager.Name)
+  }
 
   override def receive: Receive =
     LoggingReceive {
-
       case RegisterStudentCommand(student) =>
-          val persistenceId = createUniqueApplicationNumber
-          getStudentActor(persistenceId) forward RegisterStudentCommand(student.copy(applicationNumber = Some(persistenceId)))
-
-      case _ =>  sender() ! StudentRegistrationFailed(StudentException("Invalid Command."))
+          log.info("Handling RegisterStudentCommand command,")
+          getStudentActor forward RegisterStudentCommand(
+            student.copy(applicationNumber = Some(createUniqueApplicationNumber))
+          )
+      case _ =>  {
+        log.error("Invalid Command")
+        sender() ! StudentRegistrationFailed(StudentException("Invalid Command."))
+      }
     }
 
 //  def onEvent: Receive = {
@@ -60,14 +63,17 @@ class StudentManager(
 //      StudentsInSystem +: student.applicationNumber.getOrElse("")
 //  }
 
-  private def getStudentActor(appNumber: String): ActorRef = {
+  private def getStudentActor: ActorRef = {
+    log.info("Getting Actor: {}", StudentActor.Name)
 
-    val name = s"regStudent_$appNumber"
-    context.child(name) match {
+    context.child(StudentActor.Name) match {
       case Some(actorRef) => actorRef
-      case None => context.actorOf(Props(new StudentActor(PersistenceId.ofUniqueId(appNumber).id)), name)
+      case None =>
+        val childProps = Props(new StudentActor(StudentActor.Id))
+        context.actorOf(createSupervisorWithOnStopStrategy(childProps), StudentActor.Name)
     }
   }
+
 
   private def createUniqueApplicationNumber: String = {
 

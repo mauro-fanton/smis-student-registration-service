@@ -15,6 +15,8 @@ libraryDependencies ++= Seq(
   "io.lemonlabs" %% "scala-uri" % "1.5.1",
   "net.codingwell" %% "scala-guice" % "4.2.6",
   "org.typelevel" %% "cats-core" % "2.6.1",
+  "com.typesafe.akka" %% "akka-slf4j" % "2.6.18",
+  "ch.qos.logback" % "logback-classic" % "1.2.11",
 
   //Akka Persistence
   "com.typesafe.akka" %% "akka-persistence" % akkaVersion,
