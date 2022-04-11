@@ -7,6 +7,16 @@ import scala.concurrent.duration.DurationInt
 
 object SupervisorActor {
 
+  /* BackoffSupervisor
+      Start a child actor again when it fails. You can specify a min and max backof time which
+      gives to the actor some time to restart. For example in  case that some resource stop
+      working and need to restart with teh actor
+
+      The following Scala snippet shows how to create a backoff supervisor which will start the given
+      StudentManager actor after it has crashed because of some exception, in increasing intervals
+      of 3, 6, 12, 24 and finally 30 seconds:
+   */
+
   def createSupervisorWithOnFailureStrategy(childProps: Props): Props = {
     BackoffSupervisor.props(
       BackoffOpts.onFailure(

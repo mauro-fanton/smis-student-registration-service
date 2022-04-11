@@ -63,14 +63,5 @@ class StudentService @Inject()(system: ActorSystem)
         None
     }
   }
-
-//  def addStudentDto1(student: Student): Future[Option[Student]] = {
-//    persistentStudent ? RegisterStudentCommand(student) map {
-//      case StudentRegistrationSuccess(student) => Some(student)
-//      case StudentRegistrationFailed(cause) =>
-//        logger.error(s"Error occurred while registering student: ${cause.getMessage}")
-//        None
-//    }
-//  }
 }
 

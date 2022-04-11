@@ -42,7 +42,7 @@ extends StudentBaseController(cc) {
       val studentInfo = request.body.asJson
       logger.info("registering new Student...")
 
-      studentInfo.map(s => process(studentService.addStudentDto, s.as[Student])).getOrElse(Future{BadRequest("hjkhkj")})
+      studentInfo.map(s => process(studentService.addStudentDto, s.as[Student])).getOrElse(Future{BadRequest("Could not register student")})
   }
 
   private def process[A](f: A => Future[Option[Student]], o: A) = {
