@@ -25,10 +25,10 @@ object SupervisorActor {
         minBackoff = 3.seconds,
         maxBackoff = 30.seconds,
         randomFactor = 0.2 // adds 20% "noise" to vary the intervals slightly
-      ).withSupervisorStrategy(OneForOneStrategy() {
-        _ => SupervisorStrategy.Restart
-      })
-    )
+//      ).withSupervisorStrategy(OneForOneStrategy() {
+//        _ => SupervisorStrategy.defaultDecider
+//      })
+    ))
   }
 
     def createSupervisorWithOnStopStrategy(childProps: Props): Props = {

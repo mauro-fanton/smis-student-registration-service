@@ -3,19 +3,19 @@ package dto
 import model.{Activity, Address}
 import play.api.libs.json._
 
+import java.time.LocalDate
 import java.util.Date
 
 case class StudentDto
 (
   id: Option[String] = None,
-  applicationNumber: Option[String] = None,
-  firstName: String = "",
-  surname: String = "",
-  dob: Date = null,
-  address: Address = null,
-  primaryGuardianName: String = "",
+  firstName: String,
+  surname: String,
+  dob: LocalDate,
+  address: Address,
+  primaryGuardianName: String,
   secondaryGuardianName: Option[String] = None,
-  primaryTelephoneNum: String = "",
+  primaryTelephoneNum: String,
   secondaryTelephoneNum: Option[String] = None,
   activities: Option[List[Activity]] = None)
 

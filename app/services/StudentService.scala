@@ -10,6 +10,7 @@ import model.{Address, Student}
 import play.api.{Logger, MarkerContext}
 
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -23,10 +24,26 @@ class StudentService @Inject()(system: ActorSystem)
   val address2 = Address(2, "Eat End", "Newcastle", None, "NE12 7AB")
   val dateFormat = new SimpleDateFormat("dd-MM-yyyy")
   val students = List(
-    Student(id = Some("123"), firstName = "Mauro", surname = "Fanton", dob = dateFormat.parse("02-05-2019"),
-      address = address1, primaryGuardianName = "Anna", primaryTelephoneNum = "89676"),
-    Student(id = Some("4"), firstName = "Jon", surname = "McAnthony", dob = dateFormat.parse("09-12-2018"),
-      address = address2, primaryGuardianName = "Angela", primaryTelephoneNum = "56456")
+    Student
+    (
+      id = Some("123"),
+      applicationNumber = Some("1234"),
+      firstName = "Mauro",
+      surname = "Fanton",
+      dob = LocalDate.of(2019, 6, 13),
+      address = address1,
+      primaryGuardianName = "Anna",
+      primaryTelephoneNum = "89676"),
+    Student
+    (
+      id = Some("4"),
+      applicationNumber = Some("567"),
+      firstName = "Jon",
+      surname = "McAnthony",
+      dob = LocalDate.of(2022,7, 21),
+      address = address2,
+      primaryGuardianName = "Angela",
+      primaryTelephoneNum = "56456")
   )
 
   implicit val timeout = Timeout(15, TimeUnit.SECONDS)
