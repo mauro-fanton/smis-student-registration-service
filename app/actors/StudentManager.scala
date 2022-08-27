@@ -11,6 +11,7 @@ import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 import constants.EventsTags
 import dto.State
+import play.api.Logger
 
 import java.util.UUID
 import scala.annotation.tailrec
@@ -35,8 +36,10 @@ class StudentManager(
 
   students.runForeach { env =>
     env.event match {
-      case StudentRegisteredEvent(student) if(!state.contains(student.applicationNumber)) =>
-        state = state.updateState(student.applicationNumber)
+      case StudentRegisteredEvent(student)  =>
+        student.applicationNumber.fold(log.info("Application already exist."))(o =>
+          if(!state.contains(o)) state = state.updateState(o)
+        )
       case _ => println(s"Unknown event $env")
     }}
 
@@ -79,7 +82,7 @@ class StudentManager(
 
     @tailrec
     def loop(state: State, acc: String): String = {
-      if(!state.contains(Some(acc))) acc
+      if(!state.contains(acc)) acc
       else loop(state, UUID.randomUUID().toString)
     }
 

@@ -54,6 +54,8 @@ class StudentActor(override val persistenceId: String) extends PersistentActor w
   }
 
   private def updateState(evt: StudentRegisteredEvent): State = {
-    state.updateState(evt.student.applicationNumber)
+    state.updateState(evt.student.applicationNumber.getOrElse(
+      throw new IllegalStateException("Could not update local state. Invalid applicationNumber."))
+    )
   }
 }

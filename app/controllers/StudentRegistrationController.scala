@@ -4,7 +4,7 @@ import errors.ErrorHandler.handleExceptionWithLogs
 import model.Student
 import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, Result}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -27,14 +27,10 @@ extends StudentBaseController(cc) {
   def students(): Action[AnyContent] = StudentAction.async {
     implicit request =>
       logger.trace("Getting all Registered Student")
-
-      (
-        for {
-          students <- studentService.getAll
-        } yield Ok(Json.toJson(students))
-        ).recover {
-        case e:Exception => handleExceptionWithLogs(e, logger, s"Error on retrieving all the students")
-      }
+      (for {students <- studentService.getAll} yield Ok(Json.toJson(students)))
+        .recover {
+          case e:Exception => handleExceptionWithLogs(e, logger, s"Error on retrieving all the students")
+        }
   }
 
   def register: Action[AnyContent] = StudentAction.async {
@@ -42,10 +38,11 @@ extends StudentBaseController(cc) {
       val studentInfo = request.body.asJson
       logger.info("registering new Student...")
 
+
       studentInfo.map(s => process(studentService.addStudentDto, s.as[Student])).getOrElse(Future{BadRequest("Could not register student")})
   }
 
-  private def process[A](f: A => Future[Option[Student]], o: A) = {
+  private def process[A](f: A => Future[Option[Student]], o: A): Future[Result] = {
     (
       for {
         student <- f(o)

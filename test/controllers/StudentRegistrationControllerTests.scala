@@ -9,6 +9,7 @@ import play.api.libs.ws._
 import play.api.test._
 
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 
 class StudentRegistrationControllerTests extends PlaySpecification {
 
@@ -38,9 +39,12 @@ class StudentRegistrationControllerTests extends PlaySpecification {
 
       val activities = Option(List(Activity("Coding Club"), Activity("Science Club")))
       val address = Address(houseNumber = 78, streetName = "Long Street", city = "Leeds", postCode = "NE23 7RT")
-      val data1: Student = Student(firstName = "Marc",
+      val data1: Student = Student(
+        id = Some("1"),
+        applicationNumber = Some("123"),
+        firstName = "Marc",
         surname = "Smith",
-        dob = new SimpleDateFormat("dd-MM-yyyy").parse("05-07-2020"),
+        dob = LocalDate.parse("05-07-2020"),
         primaryGuardianName = "Laura J0nson",
         primaryTelephoneNum = "07862367465",
         activities = activities,

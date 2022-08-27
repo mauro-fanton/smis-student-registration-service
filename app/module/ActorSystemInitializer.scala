@@ -2,8 +2,7 @@ package module
 
 import actors.{StudentManager, SupervisorActor}
 import akka.actor.typed.scaladsl.adapter.ClassicActorSystemOps
-import akka.actor.{ActorSystem, OneForOneStrategy, Props, SupervisorStrategy}
-import akka.pattern.{BackoffOpts, BackoffSupervisor}
+import akka.actor.{ActorSystem, Props}
 import akka.projection.ProjectionBehavior
 import constants.EventsTags
 import play.api.Logger
@@ -11,10 +10,13 @@ import projections.StudentProjection
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration.DurationInt
 
 @Singleton
-class ActorSystemInitializer @Inject()(system: ActorSystem)(implicit ex: ExecutionContext ){
+class ActorSystemInitializer @Inject()
+(
+  system: ActorSystem,
+  studentProjection: StudentProjection
+)(implicit val ex: ExecutionContext ){
 
   private val LOGGER = Logger(getClass)
 
@@ -24,5 +26,5 @@ class ActorSystemInitializer @Inject()(system: ActorSystem)(implicit ex: Executi
   system.actorOf(SupervisorActor.createSupervisorWithOnFailureStrategy(childProps), StudentManager.Name)
 
   val typedSystem = system.toTyped
-  typedSystem.systemActorOf(ProjectionBehavior(StudentProjection.projection(typedSystem, EventsTags.STUDENT_REGISTERED_EVENT)), StudentProjection.ProjectionName)
+  typedSystem.systemActorOf(ProjectionBehavior(studentProjection.projection(typedSystem, EventsTags.STUDENT_REGISTERED_EVENT)), StudentProjection.ProjectionName)
 }

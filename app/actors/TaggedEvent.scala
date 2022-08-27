@@ -1,5 +1,3 @@
 package actors
 
-trait TaggedEvent {
-
-}
+trait TaggedEvent
